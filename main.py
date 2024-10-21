@@ -1,7 +1,14 @@
+import tkinter as tk
+from tkinter import messagebox
 from unidecode import unidecode
 
-class SistemaDiagnostico:
-    def __init__(self):
+class SistemaDiagnosticoGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Sistema de Diagnóstico de Cursos")
+        self.root.geometry("600x400")
+        self.root.configure(bg="#F5F5F7")  # Fundo claro, semelhante ao macOS
+
         self.perguntas = {
             1: "Quais matérias você mais gosta? (Exatas, Humanas, Biológicas)",
             2: "Você tem mais interesse em trabalhos teóricos ou práticos? (Teóricos, Práticos)",
@@ -10,25 +17,49 @@ class SistemaDiagnostico:
             5: "Você tem interesse em tecnologia? (Sim, Não)",
             6: "Você prefere ambientes dinâmicos ou estáveis? (Dinâmicos, Estáveis)"
         }
+
         self.respostas = {}
         self.cursos = {
-            'engenharia_computacao': 0,
-            'engenharia_civil': 0,
-            'ciencia_computacao': 0,
-            'medicina': 0,
-            'direito': 0,
-            'psicologia': 0,
-            'biotecnologia': 0,
-            'fisica': 0,
-            'matematica': 0,
-            'historia': 0,
-            'administracao': 0,
-            'quimica': 0,
-            'engenharia_quimica': 0,
-            'biologia': 0,
+            'Engenharia de Computação': 0,
+            'Engenharia Civil': 0,
+            'Ciência da Computação': 0,
+            'Medicina': 0,
+            'Direito': 0,
+            'Psicologia': 0,
+            'Biotecnologia': 0,
+            'Física': 0,
+            'Matemática': 0,
+            'História': 0,
+            'Administração': 0,
+            'Química': 0,
+            'Engenharia Química': 0,
+            'Biologia': 0,
         }
 
-    def fazer_pergunta(self, num_pergunta):
+        self.current_question = 1
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.frame_perguntas = tk.Frame(self.root, bg="#F5F5F7")
+        self.frame_perguntas.pack(expand=True)
+
+        self.label_pergunta = tk.Label(self.frame_perguntas, text=self.perguntas[self.current_question],
+                                       font=("Helvetica", 14), bg="#F5F5F7", fg="#000000")
+        self.label_pergunta.pack(pady=20)
+
+        self.entry_resposta = tk.Entry(self.frame_perguntas, font=("Helvetica", 12), bg="#FFFFFF", fg="#000000", relief="flat",
+                                       borderwidth=3)
+        self.entry_resposta.pack(ipady=5, padx=20)
+
+        self.btn_proxima = tk.Button(self.frame_perguntas, text="Próxima", command=self.proxima_pergunta, font=("Helvetica", 12),
+                                     bg="#007AFF", fg="#FFFFFF", activebackground="#005BB5", relief="flat",
+                                     borderwidth=2, cursor="hand2")
+        self.btn_proxima.pack(pady=20)
+
+    def proxima_pergunta(self):
+        resposta = self.entry_resposta.get().strip().lower()
+        resposta = unidecode(resposta)
+
         respostas_validas = {
             1: ['exatas', 'humanas', 'biologicas'],
             2: ['teoricos', 'praticos'],
@@ -37,96 +68,89 @@ class SistemaDiagnostico:
             6: ['dinamicos', 'estaveis']
         }
 
-        while True:
-            resposta = input(self.perguntas[num_pergunta] + ": ").strip().lower()
-            resposta = unidecode(resposta)
-            # Verifica se a pergunta tem respostas pré-definidas
-            if num_pergunta in respostas_validas:
-                if resposta in respostas_validas[num_pergunta]:
-                    break
+        if self.current_question in respostas_validas and resposta not in respostas_validas[self.current_question]:
+            messagebox.showerror("Erro", "Por favor, insira uma resposta válida.")
+        else:
+            self.respostas[self.current_question] = resposta
+            self.current_question += 1
+
+            if self.current_question > len(self.perguntas):
+                self.calcular_pontuacao()
+                self.exibir_resultado_na_tela()
             else:
-                break
-            print("Por favor, insira uma resposta válida.")
-        
-        self.respostas[num_pergunta] = resposta
-
-
-    def diagnostico(self):
-        print("Bem-vindo ao sistema de diagnóstico de cursos!")
-
-        for i in range(1, len(self.perguntas) + 1):
-            self.fazer_pergunta(i)
-
-        print(f"Respostas: {self.respostas}")
-        self.calcular_pontuacao()
-
-        # Retornar cursos com maiores pontuações
-        cursos_recomendados = sorted(self.cursos.items(), key=lambda x: x[1], reverse=True)
-        print("Sugestões de cursos mais indicados para você:")
-        for curso, pontos in cursos_recomendados[:3]:
-            print(f"{curso.replace('_', ' ').title()} (Pontuação: {pontos})")
+                self.label_pergunta.config(text=self.perguntas[self.current_question])
+                self.entry_resposta.delete(0, tk.END)
 
     def calcular_pontuacao(self):
-        # Peso para Exatas, Humanas ou Biológicas
         if self.respostas[1] == "exatas":
-            self.cursos['engenharia_computacao'] += 10
-            self.cursos['ciencia_computacao'] += 10
-            self.cursos['fisica'] += 7
-            self.cursos['matematica'] += 7
-            self.cursos['quimica'] += 7
-            self.cursos['engenharia_quimica'] += 8
+            self.cursos['Engenharia de Computação'] += 10
+            self.cursos['Ciência da Computação'] += 10
+            self.cursos['Física'] += 7
+            self.cursos['Matemática'] += 7
+            self.cursos['Química'] += 7
+            self.cursos['Engenharia Química'] += 8
         elif self.respostas[1] == "biologicas":
-            self.cursos['medicina'] += 10
-            self.cursos['biotecnologia'] += 8
-            self.cursos['psicologia'] += 6
-            self.cursos['biologia'] += 8
+            self.cursos['Medicina'] += 10
+            self.cursos['Biotecnologia'] += 8
+            self.cursos['Psicologia'] += 6
+            self.cursos['Biologia'] += 8
         elif self.respostas[1] == "humanas":
-            self.cursos['direito'] += 10
-            self.cursos['psicologia'] += 7
-            self.cursos['historia'] += 8
-            self.cursos['administracao'] += 6
+            self.cursos['Direito'] += 10
+            self.cursos['Psicologia'] += 7
+            self.cursos['História'] += 8
+            self.cursos['Administração'] += 6
 
-        # Peso para Trabalhos Teóricos ou Práticos
         if self.respostas[2] == "teoricos":
-            self.cursos['fisica'] += 5
-            self.cursos['matematica'] += 5
-            self.cursos['quimica'] += 5
-            self.cursos['historia'] += 4
+            self.cursos['Física'] += 5
+            self.cursos['Matemática'] += 5
+            self.cursos['Química'] += 5
+            self.cursos['História'] += 4
         elif self.respostas[2] == "praticos":
-            self.cursos['engenharia_civil'] += 7
-            self.cursos['engenharia_computacao'] += 7
-            self.cursos['medicina'] += 6
-            self.cursos['biotecnologia'] += 5
-            self.cursos['engenharia_quimica'] += 6
+            self.cursos['Engenharia Civil'] += 7
+            self.cursos['Engenharia de Computação'] += 7
+            self.cursos['Medicina'] += 6
+            self.cursos['Biotecnologia'] += 5
+            self.cursos['Engenharia Química'] += 6
 
-        # Peso para trabalhar com Pessoas ou Sozinho
         if self.respostas[3] == "pessoas":
-            self.cursos['psicologia'] += 8
-            self.cursos['direito'] += 7
-            self.cursos['medicina'] += 5
+            self.cursos['Psicologia'] += 8
+            self.cursos['Direito'] += 7
+            self.cursos['Medicina'] += 5
         elif self.respostas[3] == "sozinho":
-            self.cursos['engenharia_computacao'] += 6
-            self.cursos['ciencia_computacao'] += 6
-            self.cursos['fisica'] += 5
+            self.cursos['Engenharia de Computação'] += 6
+            self.cursos['Ciência da Computação'] += 6
+            self.cursos['Física'] += 5
 
-        # Interesse em tecnologia
         if self.respostas[5] == "sim":
-            self.cursos['engenharia_computacao'] += 8
-            self.cursos['ciencia_computacao'] += 8
+            self.cursos['Engenharia de Computação'] += 8
+            self.cursos['Ciência da Computação'] += 8
         elif self.respostas[5] == "nao":
-            self.cursos['historia'] += 5
-            self.cursos['psicologia'] += 5
+            self.cursos['História'] += 5
+            self.cursos['Psicologia'] += 5
 
-        # Preferência por ambientes dinâmicos ou estáveis
         if self.respostas[6] == "dinamicos":
-            self.cursos['engenharia_civil'] += 6
-            self.cursos['medicina'] += 6
-            self.cursos['administracao'] += 5
+            self.cursos['Engenharia Civil'] += 6
+            self.cursos['Medicina'] += 6
+            self.cursos['Administração'] += 5
         elif self.respostas[6] == "estaveis":
-            self.cursos['fisica'] += 5
-            self.cursos['historia'] += 5
+            self.cursos['Física'] += 5
+            self.cursos['História'] += 5
 
+    def exibir_resultado_na_tela(self):
+        for widget in self.frame_perguntas.winfo_children():
+            widget.destroy()
+
+        self.label_resultado = tk.Label(self.frame_perguntas, text="Sugestões de cursos mais indicados para você:",
+                                        font=("Helvetica", 14), bg="#F5F5F7", fg="#000000")
+        self.label_resultado.pack(pady=20)
+
+        cursos_recomendados = sorted(self.cursos.items(), key=lambda x: x[1], reverse=True)
+        for curso, pontos in cursos_recomendados[:3]:
+            label_curso = tk.Label(self.frame_perguntas, text=f"{curso} (Pontuação: {pontos})",
+                                   font=("Helvetica", 12), bg="#F5F5F7", fg="#000000")
+            label_curso.pack(pady=5)
 
 if __name__ == "__main__":
-    sistema = SistemaDiagnostico()
-    sistema.diagnostico()
+    root = tk.Tk()
+    app = SistemaDiagnosticoGUI(root)
+    root.mainloop()
