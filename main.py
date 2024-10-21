@@ -7,7 +7,7 @@ class SistemaDiagnosticoGUI:
         self.root = root
         self.root.title("Sistema de Diagnóstico de Cursos")
         self.root.geometry("600x400")
-        self.root.configure(bg="#F5F5F7")  # Fundo claro, semelhante ao macOS
+        self.root.configure(bg="#F5F5F7")
 
         self.perguntas = {
             1: "Quais matérias você mais gosta? (Exatas, Humanas, Biológicas)",
