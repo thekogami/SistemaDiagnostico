@@ -11,10 +11,36 @@ class SistemaDiagnostico:
             6: "Você prefere ambientes dinâmicos ou estáveis? (Dinâmicos, Estáveis)"
         }
         self.respostas = {}
+        self.cursos = {
+            'engenharia_computacao': 0,
+            'engenharia_civil': 0,
+            'ciencia_computacao': 0,
+            'medicina': 0,
+            'direito': 0,
+            'psicologia': 0,
+            'biotecnologia': 0,
+            'fisica': 0,
+            'matematica': 0,
+            'historia': 0,
+            'administracao': 0,
+        }
 
     def fazer_pergunta(self, num_pergunta):
-        resposta = input(self.perguntas[num_pergunta] + ": ").strip().lower()
-        resposta = unidecode(resposta)
+        while True:
+            resposta = input(self.perguntas[num_pergunta] + ": ").strip().lower()
+            resposta = unidecode(resposta)
+            if num_pergunta == 1 and resposta in ['exatas', 'humanas', 'biologicas']:
+                break
+            elif num_pergunta == 2 and resposta in ['teoricos', 'praticos']:
+                break
+            elif num_pergunta == 3 and resposta in ['pessoas', 'sozinho']:
+                break
+            elif num_pergunta == 5 and resposta in ['sim', 'nao']:
+                break
+            elif num_pergunta == 6 and resposta in ['dinamicos', 'estaveis']:
+                break
+            else:
+                print("Por favor, insira uma resposta válida.")
         self.respostas[num_pergunta] = resposta
 
     def diagnostico(self):
@@ -24,63 +50,68 @@ class SistemaDiagnostico:
             self.fazer_pergunta(i)
 
         print(f"Respostas: {self.respostas}")
+        self.calcular_pontuacao()
 
+        # Retornar cursos com maiores pontuações
+        cursos_recomendados = sorted(self.cursos.items(), key=lambda x: x[1], reverse=True)
+        print("Sugestões de cursos mais indicados para você:")
+        for curso, pontos in cursos_recomendados[:3]:
+            print(f"{curso.replace('_', ' ').title()} (Pontuação: {pontos})")
+
+    def calcular_pontuacao(self):
+        # Peso para Exatas, Humanas ou Biológicas
         if self.respostas[1] == "exatas":
-            self.diagnostico_exatas()
+            self.cursos['engenharia_computacao'] += 10
+            self.cursos['ciencia_computacao'] += 10
+            self.cursos['fisica'] += 7
+            self.cursos['matematica'] += 7
         elif self.respostas[1] == "biologicas":
-            self.diagnostico_biologicas()
+            self.cursos['medicina'] += 10
+            self.cursos['biotecnologia'] += 8
+            self.cursos['psicologia'] += 6
         elif self.respostas[1] == "humanas":
-            self.diagnostico_humanas()
-        else:
-            print("Resposta inválida, tente novamente.")
+            self.cursos['direito'] += 10
+            self.cursos['psicologia'] += 7
+            self.cursos['historia'] += 8
+            self.cursos['administracao'] += 6
 
-    def diagnostico_exatas(self):
-        if self.respostas[2] == "praticos" and self.respostas[3] == "sozinho":
-            print("Sugestão de cursos: Engenharia da Computação, Ciência da Computação.")
-        elif self.respostas[2] == "praticos" and self.respostas[3] == "pessoas":
-            print("Sugestão de cursos: Engenharia Civil, Engenharia Elétrica.")
-        elif self.respostas[2] == "teoricos" and self.respostas[3] == "sozinho":
-            print("Sugestão de cursos: Física, Matemática.")
-        elif self.respostas[2] == "teoricos" and self.respostas[3] == "pessoas":
-            print("Sugestão de cursos: Ensino de Matemática, Física Aplicada.")
+        # Peso para Trabalhos Teóricos ou Práticos
+        if self.respostas[2] == "teoricos":
+            self.cursos['fisica'] += 5
+            self.cursos['matematica'] += 5
+            self.cursos['historia'] += 4
+        elif self.respostas[2] == "praticos":
+            self.cursos['engenharia_civil'] += 7
+            self.cursos['engenharia_computacao'] += 7
+            self.cursos['medicina'] += 6
+            self.cursos['biotecnologia'] += 5
+
+        # Peso para trabalhar com Pessoas ou Sozinho
+        if self.respostas[3] == "pessoas":
+            self.cursos['psicologia'] += 8
+            self.cursos['direito'] += 7
+            self.cursos['medicina'] += 5
+        elif self.respostas[3] == "sozinho":
+            self.cursos['engenharia_computacao'] += 6
+            self.cursos['ciencia_computacao'] += 6
+            self.cursos['fisica'] += 5
+
+        # Interesse em tecnologia
         if self.respostas[5] == "sim":
-            print("Sugestão adicional: Ciência da Computação, Sistemas de Informação.")
-        if self.respostas[6] == "dinamicos":
-            print("Sugestão adicional: Engenharia de Software, Desenvolvimento Web.")
-        else:
-            print("Sugestão adicional: Análise de Sistemas, Engenharia de Controle e Automação.")
+            self.cursos['engenharia_computacao'] += 8
+            self.cursos['ciencia_computacao'] += 8
+        elif self.respostas[5] == "nao":
+            self.cursos['historia'] += 5
+            self.cursos['psicologia'] += 5
 
-    def diagnostico_biologicas(self):
-        if self.respostas[2] == "praticos" and self.respostas[3] == "pessoas":
-            print("Sugestão de cursos: Medicina, Enfermagem, Fisioterapia.")
-        elif self.respostas[2] == "praticos" and self.respostas[3] == "sozinho":
-            print("Sugestão de cursos: Biotecnologia, Bioquímica.")
-        elif self.respostas[2] == "teoricos" and self.respostas[3] == "pessoas":
-            print("Sugestão de cursos: Psicologia, Medicina Veterinária.")
-        elif self.respostas[2] == "teoricos" and self.respostas[3] == "sozinho":
-            print("Sugestão de cursos: Biologia, Ciências Biológicas.")
-        if self.respostas[5] == "sim":
-            print("Sugestão adicional: Biomedicina, Ciências Farmacêuticas.")
+        # Preferência por ambientes dinâmicos ou estáveis
         if self.respostas[6] == "dinamicos":
-            print("Sugestão adicional: Farmácia, Gestão Ambiental.")
-        else:
-            print("Sugestão adicional: Tecnologia em Análise e Desenvolvimento de Sistemas.")
-
-    def diagnostico_humanas(self):
-        if self.respostas[2] == "praticos" and self.respostas[3] == "pessoas":
-            print("Sugestão de cursos: Direito, Administração, Ciências Sociais.")
-        elif self.respostas[2] == "praticos" and self.respostas[3] == "sozinho":
-            print("Sugestão de cursos: História, Filosofia.")
-        elif self.respostas[2] == "teoricos" and self.respostas[3] == "pessoas":
-            print("Sugestão de cursos: Pedagogia, Serviço Social.")
-        elif self.respostas[2] == "teoricos" and self.respostas[3] == "sozinho":
-            print("Sugestão de cursos: Letras, Linguística.")
-        if self.respostas[5] == "nao":
-            print("Sugestão adicional: Administração Pública, Relações Internacionais.")
-        if self.respostas[6] == "estaveis":
-            print("Sugestão adicional: História, Biblioteconomia.")
-        else:
-            print("Sugestão adicional: Psicologia, Sociologia.")
+            self.cursos['engenharia_civil'] += 6
+            self.cursos['medicina'] += 6
+            self.cursos['administracao'] += 5
+        elif self.respostas[6] == "estaveis":
+            self.cursos['fisica'] += 5
+            self.cursos['historia'] += 5
 
 
 if __name__ == "__main__":
