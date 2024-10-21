@@ -38,6 +38,8 @@ class SistemaDiagnostico:
                 break
             elif num_pergunta == 3 and resposta in ['pessoas', 'sozinho']:
                 break
+            elif num_pergunta == 4:
+                break
             elif num_pergunta == 5 and resposta in ['sim', 'nao']:
                 break
             elif num_pergunta == 6 and resposta in ['dinamicos', 'estaveis']:
