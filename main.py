@@ -23,6 +23,9 @@ class SistemaDiagnostico:
             'matematica': 0,
             'historia': 0,
             'administracao': 0,
+            'quimica': 0,
+            'engenharia_quimica': 0,
+            'biologia': 0,
         }
 
     def fazer_pergunta(self, num_pergunta):
@@ -65,10 +68,13 @@ class SistemaDiagnostico:
             self.cursos['ciencia_computacao'] += 10
             self.cursos['fisica'] += 7
             self.cursos['matematica'] += 7
+            self.cursos['quimica'] += 7
+            self.cursos['engenharia_quimica'] += 8
         elif self.respostas[1] == "biologicas":
             self.cursos['medicina'] += 10
             self.cursos['biotecnologia'] += 8
             self.cursos['psicologia'] += 6
+            self.cursos['biologia'] += 8
         elif self.respostas[1] == "humanas":
             self.cursos['direito'] += 10
             self.cursos['psicologia'] += 7
@@ -79,12 +85,14 @@ class SistemaDiagnostico:
         if self.respostas[2] == "teoricos":
             self.cursos['fisica'] += 5
             self.cursos['matematica'] += 5
+            self.cursos['quimica'] += 5
             self.cursos['historia'] += 4
         elif self.respostas[2] == "praticos":
             self.cursos['engenharia_civil'] += 7
             self.cursos['engenharia_computacao'] += 7
             self.cursos['medicina'] += 6
             self.cursos['biotecnologia'] += 5
+            self.cursos['engenharia_quimica'] += 6
 
         # Peso para trabalhar com Pessoas ou Sozinho
         if self.respostas[3] == "pessoas":
