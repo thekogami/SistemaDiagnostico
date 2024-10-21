@@ -29,24 +29,27 @@ class SistemaDiagnostico:
         }
 
     def fazer_pergunta(self, num_pergunta):
+        respostas_validas = {
+            1: ['exatas', 'humanas', 'biologicas'],
+            2: ['teoricos', 'praticos'],
+            3: ['pessoas', 'sozinho'],
+            5: ['sim', 'nao'],
+            6: ['dinamicos', 'estaveis']
+        }
+
         while True:
             resposta = input(self.perguntas[num_pergunta] + ": ").strip().lower()
             resposta = unidecode(resposta)
-            if num_pergunta == 1 and resposta in ['exatas', 'humanas', 'biologicas']:
-                break
-            elif num_pergunta == 2 and resposta in ['teoricos', 'praticos']:
-                break
-            elif num_pergunta == 3 and resposta in ['pessoas', 'sozinho']:
-                break
-            elif num_pergunta == 4:
-                break
-            elif num_pergunta == 5 and resposta in ['sim', 'nao']:
-                break
-            elif num_pergunta == 6 and resposta in ['dinamicos', 'estaveis']:
-                break
+            # Verifica se a pergunta tem respostas pré-definidas
+            if num_pergunta in respostas_validas:
+                if resposta in respostas_validas[num_pergunta]:
+                    break
             else:
-                print("Por favor, insira uma resposta válida.")
+                break
+            print("Por favor, insira uma resposta válida.")
+        
         self.respostas[num_pergunta] = resposta
+
 
     def diagnostico(self):
         print("Bem-vindo ao sistema de diagnóstico de cursos!")
