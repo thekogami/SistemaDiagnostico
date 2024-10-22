@@ -1,12 +1,16 @@
 import tkinter as tk
 from tkinter import messagebox
 from unidecode import unidecode
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
+
 
 class SistemaDiagnosticoGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Sistema de Diagnóstico de Cursos")
-        self.root.geometry("600x400")
+        self.root.geometry("1500x900")  # Aumentei a janela para acomodar o gráfico
         self.root.configure(bg="#F5F5F7")
 
         self.perguntas = {
@@ -140,15 +144,47 @@ class SistemaDiagnosticoGUI:
         for widget in self.frame_perguntas.winfo_children():
             widget.destroy()
 
-        self.label_resultado = tk.Label(self.frame_perguntas, text="Sugestões de cursos mais indicados para você:",
+        self.label_resultado = tk.Label(self.frame_perguntas, text="Perfil Acadêmico: Sugestões de Cursos e suas Pontuações:",
                                         font=("Helvetica", 14), bg="#F5F5F7", fg="#000000")
         self.label_resultado.pack(pady=20)
 
-        cursos_recomendados = sorted(self.cursos.items(), key=lambda x: x[1], reverse=True)
-        for curso, pontos in cursos_recomendados[:3]:
-            label_curso = tk.Label(self.frame_perguntas, text=f"{curso} (Pontuação: {pontos})",
-                                   font=("Helvetica", 12), bg="#F5F5F7", fg="#000000")
-            label_curso.pack(pady=5)
+        cursos_recomendados = sorted(self.cursos.items(), key=lambda x: x[1], reverse=True)[:5]
+        cursos_nomes = [curso[0] for curso in cursos_recomendados]
+        cursos_pontos = [curso[1] for curso in cursos_recomendados]
+
+        # Exibe o gráfico de barras
+        self.mostrar_grafico(cursos_nomes, cursos_pontos)
+
+    def mostrar_grafico(self, nomes, pontos):
+        fig, ax = plt.subplots(figsize=(8, 6))
+        barras = ax.bar(nomes, [0]*len(pontos), color='blue')
+        ax.set_title('Pontuação dos Cursos Recomendados')
+        ax.set_xlabel('Cursos')
+        ax.set_ylabel('Pontuação')
+
+        # Converte o gráfico para o Tkinter
+        canvas = FigureCanvasTkAgg(fig, master=self.frame_perguntas)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+
+        # Efeito de crescimento das barras
+        self.root.after(500, self.animar_barras, barras, pontos, ax, canvas)
+
+    def animar_barras(self, barras, pontos_finais, ax, canvas, step=1):
+        animado = False
+        for i, (barra, ponto_final) in enumerate(zip(barras, pontos_finais)):
+            altura_atual = barra.get_height()
+            nova_altura = min(altura_atual + step, ponto_final)
+            barra.set_height(nova_altura)
+            if nova_altura < ponto_final:
+                animado = True
+
+        if animado:
+            ax.relim()
+            ax.autoscale_view()
+            canvas.draw()
+            self.root.after(50, self.animar_barras, barras, pontos_finais, ax, canvas, step + 1)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
