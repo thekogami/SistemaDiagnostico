@@ -1,10 +1,9 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from unidecode import unidecode
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
-
 
 class SistemaDiagnosticoGUI:
     def __init__(self, root):
@@ -39,6 +38,9 @@ class SistemaDiagnosticoGUI:
             'Engenharia Química': 0,
             'Biologia': 0,
         }
+
+        # Dados para múltiplos perfis
+        self.dados_perfis = []
 
         self.current_question = 1
         self.create_widgets()
@@ -80,10 +82,15 @@ class SistemaDiagnosticoGUI:
 
             if self.current_question > len(self.perguntas):
                 self.calcular_pontuacao()
+                self.salvar_perfil()
                 self.exibir_resultado_na_tela()
             else:
                 self.label_pergunta.config(text=self.perguntas[self.current_question])
                 self.entry_resposta.delete(0, tk.END)
+
+    def salvar_perfil(self):
+        perfil_atual = self.cursos.copy()
+        self.dados_perfis.append(perfil_atual)
 
     def calcular_pontuacao(self):
         if self.respostas[1] == "exatas":
@@ -144,43 +151,76 @@ class SistemaDiagnosticoGUI:
         for widget in self.frame_perguntas.winfo_children():
             widget.destroy()
 
-        self.label_resultado = tk.Label(self.frame_perguntas, text="Perfil Acadêmico: Sugestões de Cursos e suas Pontuações:",
+        self.label_resultado = tk.Label(self.frame_perguntas, text="Comparação de Perfis Acadêmicos:",
                                         font=("Helvetica", 14), bg="#F5F5F7", fg="#000000")
         self.label_resultado.pack(pady=20)
 
-        cursos_recomendados = sorted(self.cursos.items(), key=lambda x: x[1], reverse=True)[:5]
-        cursos_nomes = [curso[0] for curso in cursos_recomendados]
-        cursos_pontos = [curso[1] for curso in cursos_recomendados]
+        if len(self.dados_perfis) > 1:
+            self.mostrar_grafico_multilinhado()
+            self.mostrar_planilha_comparativa()
+        else:
+            self.exibir_mensagem("Apenas um perfil registrado, execute o diagnóstico mais vezes para comparar perfis.")
+        
+        self.btn_novo_diagnostico = tk.Button(self.frame_perguntas, text="Novo Diagnóstico", 
+                                              command=self.iniciar_novo_diagnostico, 
+                                              font=("Helvetica", 12), bg="#28A745", fg="#FFFFFF",
+                                              relief="flat", borderwidth=2, cursor="hand2")
+        self.btn_novo_diagnostico.pack(pady=20)
 
-        self.mostrar_grafico(cursos_nomes, cursos_pontos)
+    def iniciar_novo_diagnostico(self):
+        self.current_question = 1
+        self.respostas = {}
+        self.cursos = {key: 0 for key in self.cursos}
+        self.create_widgets()
 
-    def mostrar_grafico(self, nomes, pontos):
-        fig, ax = plt.subplots(figsize=(8, 6))
-        barras = ax.bar(nomes, [0]*len(pontos), color='blue')
-        ax.set_title('Pontuação dos Cursos Recomendados')
+    def mostrar_grafico_multilinhado(self):
+        fig, ax = plt.subplots(figsize=(10, 7))
+
+        cursos = list(self.cursos.keys())
+        for i, perfil in enumerate(self.dados_perfis):
+            pontuacoes = [perfil[curso] for curso in cursos]
+            ax.plot(cursos, pontuacoes, marker='o', label=f'Perfil {i+1}')
+
+        ax.set_title('Comparação de Perfis Acadêmicos')
         ax.set_xlabel('Cursos')
         ax.set_ylabel('Pontuação')
+        ax.legend()
+        ax.grid(True)
+
+        plt.xticks(rotation=45, ha='right', fontsize=8)
+        ax.set_xticks(np.arange(len(cursos)))
+        ax.set_xticklabels(cursos, fontsize=8, ha='right')
 
         canvas = FigureCanvasTkAgg(fig, master=self.frame_perguntas)
         canvas.draw()
-        canvas.get_tk_widget().pack()
+        canvas.get_tk_widget().pack(fill='both', expand=True)
 
-        self.root.after(500, self.animar_barras, barras, pontos, ax, canvas)
 
-    def animar_barras(self, barras, pontos_finais, ax, canvas, step=1):
-        animado = False
-        for i, (barra, ponto_final) in enumerate(zip(barras, pontos_finais)):
-            altura_atual = barra.get_height()
-            nova_altura = min(altura_atual + step, ponto_final)
-            barra.set_height(nova_altura)
-            if nova_altura < ponto_final:
-                animado = True
+    def mostrar_planilha_comparativa(self):
+        cursos = list(self.cursos.keys())
+        planilha_frame = tk.Frame(self.frame_perguntas)
+        planilha_frame.pack(fill='both', expand=True)
 
-        if animado:
-            ax.relim()
-            ax.autoscale_view()
-            canvas.draw()
-            self.root.after(50, self.animar_barras, barras, pontos_finais, ax, canvas, step + 1)
+        colunas = ('Curso', *[f'Perfil {i+1}' for i in range(len(self.dados_perfis))])
+        tree = ttk.Treeview(planilha_frame, columns=colunas, show='headings')
+        tree.pack(fill='both', expand=True)
+
+        tree.column('Curso', width=200)
+        for i in range(len(self.dados_perfis)):
+            tree.column(f'Perfil {i+1}', width=100)
+
+        tree.heading('Curso', text='Curso')
+        for i in range(len(self.dados_perfis)):
+            tree.heading(f'Perfil {i+1}', text=f'Perfil {i+1}')
+
+        for curso in cursos:
+            valores = [perfil[curso] for perfil in self.dados_perfis]
+            tree.insert('', 'end', values=(curso, *valores))
+
+
+    def exibir_mensagem(self, mensagem):
+        self.label_mensagem = tk.Label(self.frame_perguntas, text=mensagem, font=("Helvetica", 12), bg="#F5F5F7", fg="#333333")
+        self.label_mensagem.pack(pady=20)
 
 
 if __name__ == "__main__":
