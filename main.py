@@ -218,11 +218,15 @@ class SistemaDiagnosticoGUI:
 
 
     def mostrar_grafico(self, nomes, pontos):
-        fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(10, 8))
         barras = ax.bar(nomes, [0]*len(pontos), color='blue')
         ax.set_title('Pontuação dos Cursos Recomendados')
         ax.set_xlabel('Cursos')
         ax.set_ylabel('Pontuação')
+
+        ax.set_xticklabels(nomes, rotation=45, ha='right')
+
+        fig.tight_layout()
 
         canvas = FigureCanvasTkAgg(fig, master=self.frame_perguntas)
         canvas.draw()
