@@ -3,13 +3,13 @@ from tkinter import messagebox
 from unidecode import unidecode
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from PIL import Image, ImageTk
 import numpy as np
 
-
-class SistemaDiagnosticoGUI:
+class SistemaRecomendacaoGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Sistema de Diagnóstico de Cursos")
+        self.root.title("Sistema de Recomendação de Cursos")
         self.root.geometry("1400x800")
         self.root.configure(bg="#F5F5F7")
 
@@ -51,7 +51,14 @@ class SistemaDiagnosticoGUI:
         self.frame_inicial = tk.Frame(self.root, bg="#F5F5F7")
         self.frame_inicial.pack(expand=True, fill="both")
 
-        label_titulo = tk.Label(self.frame_inicial, text="Bem-vindo ao Sistema de Diagnóstico de Cursos!",
+        self.logo_image = Image.open("univille_logo.png")
+        self.logo_image = self.logo_image.resize((200, 200), Image.LANCZOS)
+        self.logo_photo = ImageTk.PhotoImage(self.logo_image)
+
+        self.logo_label = tk.Label(self.frame_inicial, image=self.logo_photo, bg="#F5F5F7")
+        self.logo_label.pack(pady=20)
+
+        label_titulo = tk.Label(self.frame_inicial, text="Bem-vindo ao Sistema de Recomendação de Cursos!",
                                 font=("Helvetica", 24, "bold"), bg="#F5F5F7", fg="#000000")
         label_titulo.pack(pady=50)
 
@@ -59,7 +66,7 @@ class SistemaDiagnosticoGUI:
                                    font=("Helvetica", 14), bg="#F5F5F7", fg="#333333", wraplength=800)
         label_instrucao.pack(pady=20)
 
-        btn_iniciar = tk.Button(self.frame_inicial, text="Iniciar Diagnóstico", command=self.iniciar_diagnostico,
+        btn_iniciar = tk.Button(self.frame_inicial, text="Iniciar perguntas", command=self.iniciar_diagnostico,
                                 font=("Helvetica", 16), bg="#007AFF", fg="#FFFFFF", relief="flat",
                                 borderwidth=2, cursor="hand2")
         btn_iniciar.pack(pady=40)
@@ -224,6 +231,7 @@ class SistemaDiagnosticoGUI:
         ax.set_xlabel('Cursos')
         ax.set_ylabel('Pontuação')
 
+        ax.set_xticks(range(len(nomes)))
         ax.set_xticklabels(nomes, rotation=45, ha='right')
 
         fig.tight_layout()
@@ -252,5 +260,5 @@ class SistemaDiagnosticoGUI:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = SistemaDiagnosticoGUI(root)
+    app = SistemaRecomendacaoGUI(root)
     root.mainloop()
