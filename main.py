@@ -262,3 +262,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = SistemaRecomendacaoGUI(root)
     root.mainloop()
+
+#Alunos: Felipe Mourão, Lucas Knies, Marcos Fernandes 
