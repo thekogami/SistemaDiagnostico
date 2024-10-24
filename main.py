@@ -10,16 +10,18 @@ class SistemaDiagnosticoGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Sistema de Diagnóstico de Cursos")
-        self.root.geometry("1500x900")
+        self.root.geometry("1400x800")
         self.root.configure(bg="#F5F5F7")
 
         self.perguntas = {
             1: "Quais matérias você mais gosta? (Exatas, Humanas, Biológicas)",
             2: "Você tem mais interesse em trabalhos teóricos ou práticos? (Teóricos, Práticos)",
             3: "Você prefere trabalhar com pessoas ou mais individualmente? (Pessoas, Sozinho)",
-            4: "Qual tipo de profissão você acha interessante? (Engenharia, Medicina, Direito, etc.)",
+            4: "Qual tipo de profissão você acha interessante? (Engenharia, Medicina, Direito)",
             5: "Você tem interesse em tecnologia? (Sim, Não)",
-            6: "Você prefere ambientes dinâmicos ou estáveis? (Dinâmicos, Estáveis)"
+            6: "Você prefere ambientes dinâmicos ou estáveis? (Dinâmicos, Estáveis)",
+            7: "Você gosta de resolver problemas complexos? (Sim, Não)",
+            8: "Prefere tarefas criativas ou estruturadas? (Criativas, Estruturadas)"
         }
 
         self.respostas = {}
@@ -38,9 +40,32 @@ class SistemaDiagnosticoGUI:
             'Química': 0,
             'Engenharia Química': 0,
             'Biologia': 0,
+            'Design': 0,
+            'Publicidade': 0
         }
 
         self.current_question = 1
+        self.criar_tela_inicial()
+
+    def criar_tela_inicial(self):
+        self.frame_inicial = tk.Frame(self.root, bg="#F5F5F7")
+        self.frame_inicial.pack(expand=True, fill="both")
+
+        label_titulo = tk.Label(self.frame_inicial, text="Bem-vindo ao Sistema de Diagnóstico de Cursos!",
+                                font=("Helvetica", 24, "bold"), bg="#F5F5F7", fg="#000000")
+        label_titulo.pack(pady=50)
+
+        label_instrucao = tk.Label(self.frame_inicial, text="Responda algumas perguntas e descubra sugestões de cursos universitários!",
+                                   font=("Helvetica", 14), bg="#F5F5F7", fg="#333333", wraplength=800)
+        label_instrucao.pack(pady=20)
+
+        btn_iniciar = tk.Button(self.frame_inicial, text="Iniciar Diagnóstico", command=self.iniciar_diagnostico,
+                                font=("Helvetica", 16), bg="#007AFF", fg="#FFFFFF", relief="flat",
+                                borderwidth=2, cursor="hand2")
+        btn_iniciar.pack(pady=40)
+
+    def iniciar_diagnostico(self):
+        self.frame_inicial.destroy()
         self.create_widgets()
 
     def create_widgets(self):
@@ -68,12 +93,16 @@ class SistemaDiagnosticoGUI:
             1: ['exatas', 'humanas', 'biologicas'],
             2: ['teoricos', 'praticos'],
             3: ['pessoas', 'sozinho'],
+            4: ['engenharia', 'medicina', 'direito'],
             5: ['sim', 'nao'],
-            6: ['dinamicos', 'estaveis']
+            6: ['dinamicos', 'estaveis'],
+            7: ['sim', 'nao'],
+            8: ['criativas', 'estruturadas']
         }
 
         if self.current_question in respostas_validas and resposta not in respostas_validas[self.current_question]:
             messagebox.showerror("Erro", "Por favor, insira uma resposta válida.")
+            self.entry_resposta.delete(0, tk.END)
         else:
             self.respostas[self.current_question] = resposta
             self.current_question += 1
@@ -125,6 +154,18 @@ class SistemaDiagnosticoGUI:
             self.cursos['Ciência da Computação'] += 6
             self.cursos['Física'] += 5
 
+        if self.respostas[4] == "engenharia":
+            self.cursos['Engenharia de Computação'] += 8
+            self.cursos['Engenharia Civil'] += 8
+            self.cursos['Engenharia Química'] += 7
+        elif self.respostas[4] == "medicina":
+            self.cursos['Medicina'] += 10
+            self.cursos['Biologia'] += 7
+            self.cursos['Biotecnologia'] += 6
+        elif self.respostas[4] == "direito":
+            self.cursos['Direito'] += 10
+            self.cursos['Administração'] += 6
+
         if self.respostas[5] == "sim":
             self.cursos['Engenharia de Computação'] += 8
             self.cursos['Ciência da Computação'] += 8
@@ -140,6 +181,21 @@ class SistemaDiagnosticoGUI:
             self.cursos['Física'] += 5
             self.cursos['História'] += 5
 
+        if self.respostas.get(7) == "sim":
+            self.cursos['Ciência da Computação'] += 6
+            self.cursos['Engenharia de Computação'] += 5
+            self.cursos['Matemática'] += 4
+        elif self.respostas.get(7) == "nao":
+            self.cursos['Psicologia'] += 5
+            self.cursos['Direito'] += 4
+
+        if self.respostas.get(8) == "criativas":
+            self.cursos['Design'] += 7
+            self.cursos['Publicidade'] += 6
+        elif self.respostas.get(8) == "estruturadas":
+            self.cursos['Engenharia Civil'] += 5
+            self.cursos['Administração'] += 5
+
     def exibir_resultado_na_tela(self):
         for widget in self.frame_perguntas.winfo_children():
             widget.destroy()
@@ -153,6 +209,13 @@ class SistemaDiagnosticoGUI:
         cursos_pontos = [curso[1] for curso in cursos_recomendados]
 
         self.mostrar_grafico(cursos_nomes, cursos_pontos)
+
+        metodologia = ("As sugestões de cursos foram geradas com base nas suas respostas às perguntas fornecidas. "
+                       "Cada curso foi pontuado de acordo com características como interesse por matérias específicas, "
+                       "preferência por atividades teóricas ou práticas, e outros critérios de afinidade.")
+        self.label_metodologia = tk.Label(self.frame_perguntas, text=metodologia, font=("Helvetica", 12), bg="#F5F5F7", fg="#333333", wraplength=1000, justify="left")
+        self.label_metodologia.pack(pady=20)
+
 
     def mostrar_grafico(self, nomes, pontos):
         fig, ax = plt.subplots(figsize=(8, 6))
